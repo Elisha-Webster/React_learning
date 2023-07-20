@@ -33,6 +33,51 @@
 					2.发现组件是使用类定义的，随后new出来该类的实例，并通过该实例调用到原型上的render方法。
 					3.将render返回的虚拟DOM转为真实DOM，随后呈现在页面中。
 		*/
+
+		//1.创建组件
+		class Weather extends React.Component {
+		
+		    //构造器调用几次？ ———— 1次
+		    constructor(props) {
+		    //构造器中的this固定为组件实例对象
+		        super(props)
+		          //初始化状态
+		        this.state = { isHot: false, wind: '微风' }
+		          //this实例沿着原型链找到changeWeather，用bind将原型上的changeWeather
+		          //(即下面写的changeWeather函数)改变了this指向，赋给组件实例自身
+		          //(会有两个changeWeather，一个在原型，一个在自身)
+		        this.changeWeather = this.changeWeather.bind(this)
+		    }
+		
+		      //render调用几次？ ———— 1+n次 1是初始化的那次 n是状态更新的次数
+		    render() {
+		    //render中的this也是组件实例对象，因为 ReactDOM.render new出来该类的实例，并通过该实例调用原型上的render方法
+		          //解构赋值读取状态
+		        const { isHot, wind } = this.state
+		          //绑定事件用驼峰命名，{}中的自定义函数不要加（）
+		          //这时候就会首先调用实例自身的changeWeather
+		        return <h1 onClick={this.changeWeather}>今天天气很{isHot ? '炎热' : '凉爽'}，{wind}</h1>
+		    }
+		
+		           //changeWeather调用几次？ ———— 点几次调几次
+		        changeWeather() {
+		            //changeWeather放在哪里？ ———— Weather的原型对象上，供实例使用
+		            //由于changeWeather是作为onClick的回调，所以不是通过实例调用的，是直接调用
+		            //类中的方法默认开启了局部的严格模式，所以changeWeather中的this为undefined
+		          console.log(this);
+		
+		            //获取原来的isHot值
+		          const isHot = this.state.isHot
+		            //严重注意：状态（state）必须通过setState进行更新,且更新是一种合并，不是替换，state中其他属性不会被更新。
+		          this.setState({ isHot: !isHot })
+		            //严重注意：状态(state)不可直接更改，下面这行就是直接更改！！！
+		            //this.state.isHot = !isHot //这是错误的写法
+		        }
+		}
+		//2.渲染组件到页面
+		ReactDOM.render(<Weather />, document.getElementById('test'))
+
+
 	</script>
 </body>
 </html>
